@@ -1176,14 +1176,17 @@ func prepareDiskSize(
 			return err
 		}
 
-		if diskSize > clonedDiskSize {
-			log.Print("[DEBUG] resizing disk " + diskName)
-			_, err = client.ResizeQemuDiskRaw(vmr, diskName, diskConf["size"].(string))
-			if err != nil {
-				return err
+		if diskSize != clonedDiskSize {
+			if diskSize > clonedDiskSize {
+				log.Print("[DEBUG] resizing disk " + diskName)
+				_, err = client.ResizeQemuDiskRaw(vmr, diskName, diskConf["size"].(string))
+				if err != nil {
+					return err
+				}
+			} else {
+				return fmt.Errorf("Proxmox does not support decreasing disk size. Disk '%v' wanted to go from '%v' to '%v'", diskName, clonedDiskSize, diskSize)
 			}
-		} else {
-			return fmt.Errorf("Proxmox does not support decreasing disk size. Disk '%v' wanted to go from '%v' to '%v'", diskName, clonedDiskSize, diskSize)		}
+		}
 
 	}
 	return nil
